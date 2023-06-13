@@ -1,5 +1,5 @@
 import express from 'express';
-import { Device } from '../models';
+import { Device, createDevice, getDevice } from '../models';
 
 export const router = express.Router();
 
@@ -10,7 +10,16 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const { deviceName } = req.body;
-    const device = Device.$build(deviceName);
-    await device.save();
+    await createDevice(deviceName);
     res.redirect('/devices');
+});
+
+router.get('/:deviceKey', async (req, res) => {
+    const { deviceKey } = req.params;
+    const device = await getDevice(deviceKey);
+    if (device) {
+        res.render('device', { device });
+    } else {
+        res.redirect('/devices');
+    }
 });

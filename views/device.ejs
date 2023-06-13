@@ -1,0 +1,6 @@
+<%- include("./partials/header.ejs") %>
+<h1><%= device.name %></h1>
+<div>Device Key: <%= device.key %></div>
+<div>Device ID: <%= device.deviceID %></div>
+<a href="/provenance/<%= device.key %>">View provenance records</a>
+<%- include("./partials/footer.ejs") %>

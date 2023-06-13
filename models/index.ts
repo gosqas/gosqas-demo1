@@ -14,11 +14,24 @@ export class Device extends Model {
         const hash = fnv.hash(this.key.toLowerCase(), 64).dec()
         return BigInt(hash);
     }
+}
 
-    static $build(name: string): Device {
-        const key = crypto.randomBytes(32);
-        return Device.build({ key: key.toString('hex').toLowerCase(), name })
-    }
+export function buildDevice(name: string): Device {
+    const key = crypto.randomBytes(32);
+    return Device.build({ key: key.toString('hex').toLowerCase(), name })
+}
+
+export function createDevice(name: string): Promise<Device> {
+    const device = buildDevice(name);
+    return device.save();
+}
+
+export function getDevices(): Promise<Device[]> {
+    return Device.findAll();
+}
+
+export function getDevice(key: string): Promise<Device | null> {
+    return Device.findOne({ where: { key }});
 }
 
 export function init(sequelize: Sequelize) {

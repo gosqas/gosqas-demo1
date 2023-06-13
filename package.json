@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "start": "nodemon dist/app.js"
+    "start": "nodemon dist/app.js",
+    "dev": "tsc && concurrently \"tsc --watch\" \"nodemon dist/app.js\""
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "@types/node": "^20.2.5",
     "@types/qrcode": "^1.5.0",
     "chai": "^4.3.7",
+    "concurrently": "^8.2.0",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",

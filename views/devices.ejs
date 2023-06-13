@@ -1,0 +1,15 @@
+<%- include("./partials/header.ejs") %>
+<h1>Sample Devices</h1>
+<ul>
+<% for (const device of devices) { %>
+    <li><a href="devices/<%= device.key %>"><%= device.name %></a></li>
+<% } %>
+</ul>
+<form method="POST">
+    <div class="mb-3">
+        <label for="deviceName" class="form-label">Device Name</label>
+        <input type="text" class="form-control" name="deviceName" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<%- include("./partials/footer.ejs") %>

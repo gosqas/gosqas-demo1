@@ -6,8 +6,10 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 
 const app = express();
+app.set('view engine', 'pug');
+
 app.get('/', (req, res) => {
-    res.send('Express + TypeScript Server');
+    res.render('index');
 });
 
 app.listen(port, () => {

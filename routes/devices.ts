@@ -1,5 +1,7 @@
 import express from 'express';
-import { Device, createDevice, getDevice } from '../models';
+import { Device } from '../models/Device';
+import { Sequelize } from 'sequelize';
+import { createDevice } from '../models';
 
 export const router = express.Router();
 
@@ -10,13 +12,14 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     const { deviceName } = req.body;
-    await createDevice(deviceName);
+    const sequelize = req.app.get('sequelize') as Sequelize;
+    const device = await createDevice(sequelize, deviceName);
     res.redirect('/devices');
 });
 
 router.get('/:deviceKey', async (req, res) => {
     const { deviceKey } = req.params;
-    const device = await getDevice(deviceKey);
+    const device = await Device.get(deviceKey);
     if (device) {
         res.render('device', { device });
     } else {

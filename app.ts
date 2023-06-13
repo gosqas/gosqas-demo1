@@ -19,6 +19,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 app.set('view engine', 'ejs');
+app.set('sequelize', sequelize);
 app.use(urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {

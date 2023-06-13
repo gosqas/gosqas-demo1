@@ -1,57 +1,17 @@
-import { DataTypes, Model, Sequelize } from 'sequelize'
-import * as fnv from 'fnv-plus';
+import { Model, Sequelize } from 'sequelize'
+import { Device } from './Device';
+import { ProvenanceRecord } from './ProvenanceRecord';
 import * as crypto from 'crypto';
 
-export class Device extends Model {
-    declare key: string;
-    declare name: string;
-
-    get deviceKey(): Uint8Array {
-        return Buffer.from(this.key, 'hex');
-    }
-
-    get deviceID(): bigint {
-        const hash = fnv.hash(this.key.toLowerCase(), 64).dec()
-        return BigInt(hash);
-    }
-}
-
-export function buildDevice(name: string): Device {
-    const key = crypto.randomBytes(32);
-    return Device.build({ key: key.toString('hex').toLowerCase(), name })
-}
-
-export function createDevice(name: string): Promise<Device> {
-    const device = buildDevice(name);
-    return device.save();
-}
-
-export function getDevices(): Promise<Device[]> {
-    return Device.findAll();
-}
-
-export function getDevice(key: string): Promise<Device | null> {
-    return Device.findOne({ where: { key }});
-}
-
 export function init(sequelize: Sequelize) {
-    Device.init({
-        key: {
-            type: DataTypes.STRING(64).BINARY,
-            allowNull: false,
-            unique: true
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false
-        }
-    }, {
-        indexes: [
-            {
-                unique: true,
-                fields: ['key']
-            }
-        ],
-        sequelize
-    })
+    Device.$init(sequelize);
+    ProvenanceRecord.$init(sequelize);
+}
+
+export async function createDevice(sequelize: Sequelize, name: string) {
+    return await sequelize.transaction(async (tx) => {
+        const device = await Device.make(name).save({ transaction: tx });
+        const record = await ProvenanceRecord.make(device, 'Device created').save({ transaction: tx });
+        return device;
+    });
 }

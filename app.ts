@@ -2,9 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { urlencoded } from 'body-parser';
 
-import { router as devicesRouter } from './routes/devices';
 import { Sequelize } from 'sequelize';
-import { init } from './models';
+import { createDevice, init, Device, ProvenanceRecord } from './models';
 
 dotenv.config();
 
@@ -22,7 +21,42 @@ app.set('view engine', 'ejs');
 app.set('sequelize', sequelize);
 app.use(urlencoded({ extended: true }));
 
-app.use('/', devicesRouter);
+app.get('/', async (req, res) => {
+    res.render('index', { });
+});
+
+app.get('/devices', async (req, res) => {
+    const devices = (await Device.findAll()) ?? [];
+    res.render('devices', { devices });
+});
+
+app.post('/devices', async (req, res) => {
+    const { deviceName } = req.body;
+    const sequelize = req.app.get('sequelize') as Sequelize;
+    const device = await createDevice(sequelize, deviceName);
+    res.redirect('/devices');
+});
+
+app.get('/device/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
+    const { deviceKey } = req.params;
+    const device = await Device.get(deviceKey);
+    res.render('device', { device });
+});
+
+app.get('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
+    const { deviceKey } = req.params;
+    const { deviceID, records } = await ProvenanceRecord.getRecords(deviceKey);
+
+    res.render('provenance', { deviceID, records });
+});
+
+app.post('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
+    const { deviceKey } = req.params;
+    const { assertion } = req.body;
+
+    await ProvenanceRecord.make(deviceKey, assertion).save();
+    res.redirect(`/provenance/${deviceKey}`);
+});
 
 async function main() {
     await sequelize.sync();

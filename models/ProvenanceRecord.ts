@@ -23,7 +23,10 @@ export class ProvenanceRecord extends Model {
 
     static async getRecords(deviceKey: string) {
         const deviceID = Device.calcDeviceID(deviceKey);
-        const encryptedRecords = await ProvenanceRecord.findAll({ where: { deviceID } });
+        const encryptedRecords = await ProvenanceRecord.findAll({ 
+            order: [['createdAt', 'DESC']],
+            where: { deviceID } 
+        });
         const key = Buffer.from(deviceKey, 'hex');
         const records = encryptedRecords.map(record => {
             const salt = Buffer.from(record.salt, 'hex');

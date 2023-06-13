@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { urlencoded } from 'body-parser';
+import * as QR from 'qrcode';
 
 import { Sequelize } from 'sequelize';
 import { createDevice, init, Device, ProvenanceRecord } from './models';
@@ -18,7 +19,6 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 app.set('view engine', 'ejs');
-app.set('sequelize', sequelize);
 app.use(urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
@@ -32,15 +32,17 @@ app.get('/devices', async (req, res) => {
 
 app.post('/devices', async (req, res) => {
     const { deviceName } = req.body;
-    const sequelize = req.app.get('sequelize') as Sequelize;
-    const device = await createDevice(sequelize, deviceName);
+    await createDevice(sequelize, deviceName);
     res.redirect('/devices');
 });
 
 app.get('/device/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
     const { deviceKey } = req.params;
     const device = await Device.get(deviceKey);
-    res.render('device', { device });
+    if (!device) throw new Error('Device not found');
+
+    const dataURL = await QR.toDataURL(`${process.env.BASE_URL}/provenance/${device.deviceID}`);
+    res.render('device', { device, dataURL });
 });
 
 app.get('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {

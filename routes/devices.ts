@@ -21,26 +21,23 @@ router.post('/', async (req, res) => {
 router.get('/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
     const { deviceKey } = req.params;
     const device = await Device.get(deviceKey);
+    const { records } = await ProvenanceRecord.getRecords(deviceKey);
+
     if (device) {
-        res.render('device', { device });
+        res.render('device', { device, records });
     } else {
         res.redirect('/devices');
     }
 });
 
-router.get('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
-    const { deviceKey } = req.params;
-    const { deviceID, records} = await ProvenanceRecord.getRecords(deviceKey);
-    res.render('provenance', { deviceID, records });
-});
-
-
-router.post('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
+router.post('/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
     const { deviceKey } = req.params;
     const { assertion } = req.body;
 
     await ProvenanceRecord.make(deviceKey, assertion).save();
     const { deviceID, records} = await ProvenanceRecord.getRecords(deviceKey);
-    res.render('provenance', { deviceID, records });
+    res.redirect(`/${deviceKey}`);
 });
+
+
 

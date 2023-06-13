@@ -2,5 +2,18 @@
 <h1><%= device.name %></h1>
 <div>Device Key: <%= device.key %></div>
 <div>Device ID: <%= device.deviceID %></div>
-<a href="/provenance/<%= device.key %>">View provenance records</a>
+<hr>
+<h2>Provenance Records</h2>
+<% for (const record of records) { %>
+    <div><%= record.assertion %></div>
+    <div><%= record.createdAt %></div>
+<% } %>
+<hr>
+<h2>Create New Provenance Record</h2>
+<form method="POST">
+    <div class="mb-3">
+        <input type="text" class="form-control" name="assertion" required placeholder="Device Assertion">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 <%- include("./partials/footer.ejs") %>

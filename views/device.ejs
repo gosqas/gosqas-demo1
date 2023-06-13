@@ -1,7 +1,18 @@
-<%- include("./partials/header.ejs") %>
-<h1><%= device.name %></h1>
-<div>Device Key: <%= device.key %></div>
-<div>Device ID: <%= device.deviceID %></div>
-<div><a href="/provenance/<%= device.key %>">View Provenance Records</a></div>
-<div><img src="<%= dataURL %>"></img></div>
-<%- include("./partials/footer.ejs") %>
+    <%- include("./partials/header.ejs") %>
+    <h2>
+        <%= device.name %>
+    </h2>
+    <blockquote style="background-color: lightgrey;">
+        <p>
+            This page of the prototype GOSQAS Provenance Tracker displays the QRCode that would be printed and affixed
+            to the device. For demo purposes, the prototype also provides a direct link to the device's provenance
+            records page.
+        </p>
+    </blockquote>
+    <div>Device Key: <%= device.key %>
+    </div>
+    <div>Device ID: <%= device.deviceID %>
+    </div>
+    <div><a href="/provenance/<%= device.key %>">View Provenance Records</a></div>
+    <div><img src="<%= dataURL %>"></img></div>
+    <%- include("./partials/footer.ejs") %>

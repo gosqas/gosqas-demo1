@@ -1,16 +1,25 @@
-<%- include("./partials/header.ejs") %>
-<h1>Sample Devices</h1>
-<ul>
-<% for (const device of devices) { %>
-    <li><a href="/device/<%= device.key %>"><%= device.name %></a></li>
-<% } %>
-</ul>
-<hr>
-<form method="POST">
-    <div class="mb-3">
-        <label class="form-label">Create New Device</label>
-        <input type="text" class="form-control" name="deviceName" required placeholder="Device Name">
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-<%- include("./partials/footer.ejs") %>
+    <%- include("./partials/header.ejs") %>
+    <h2>Sample Devices</h2>
+    <blockquote style="background-color: lightgrey;">
+        <p>
+            The prototype GOSQAS Provenance Tracker stores the secret key for all devices created via the form at the
+            bottom of this page. This centralized repository of device keys is for demonstration purposes only and will
+            not be a part of the final solution.
+        </p>
+    </blockquote>
+    <ul>
+        <% for (const device of devices) { %>
+            <li><a href="/device/<%= device.key %>">
+                    <%= device.name %>
+                </a></li>
+            <% } %>
+    </ul>
+    <hr>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Create New Sample Device</label>
+            <input type="text" class="form-control" name="deviceName" required placeholder="Device Name">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <%- include("./partials/footer.ejs") %>

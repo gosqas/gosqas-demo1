@@ -2,9 +2,10 @@
 <h1>Sample Devices</h1>
 <ul>
 <% for (const device of devices) { %>
-    <li><a href="devices/<%= device.key %>"><%= device.name %></a></li>
+    <li><a href="<%= device.key %>"><%= device.name %></a></li>
 <% } %>
 </ul>
+<hr>
 <form method="POST">
     <div class="mb-3">
         <label class="form-label">Create New Device</label>

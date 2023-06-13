@@ -11,7 +11,7 @@ export function init(sequelize: Sequelize) {
 export async function createDevice(sequelize: Sequelize, name: string) {
     return await sequelize.transaction(async (tx) => {
         const device = await Device.make(name).save({ transaction: tx });
-        const record = await ProvenanceRecord.make(device, 'Device created').save({ transaction: tx });
+        const record = await ProvenanceRecord.make(device.key, `${name} created`).save({ transaction: tx });
         return device;
     });
 }

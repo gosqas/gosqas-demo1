@@ -6,12 +6,16 @@ export class Device extends Model {
     declare key: string;
     declare name: string;
 
-    get deviceKey(): Uint8Array {
-        return Buffer.from(this.key, 'hex');
-    }
+    // get deviceKey(): Uint8Array {
+    //     return Buffer.from(this.key, 'hex');
+    // }
 
     get deviceID(): bigint {
-        const hash = fnv.hash(this.key.toLowerCase(), 64).dec();
+        return Device.calcDeviceID(this.key);
+    }
+
+    static calcDeviceID(key: string) {
+        const hash = fnv.hash(key.toLowerCase(), 64).dec();
         return BigInt(hash);
     }
 

@@ -22,11 +22,7 @@ app.set('view engine', 'ejs');
 app.set('sequelize', sequelize);
 app.use(urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-    res.render('index', { title: 'Express GOSQAS Provenence Tracker' });
-});
-
-app.use('/devices', devicesRouter);
+app.use('/', devicesRouter);
 
 async function main() {
     await sequelize.sync();

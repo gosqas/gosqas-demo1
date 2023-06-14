@@ -5,6 +5,10 @@
         <% if (record.type === 'text/plain') { %>
         <div><%= record.data %></div>
         <% } %>
+        <% if (record.type.startsWith('image/')) { %>
+        <div><img src="<%= record.dataURI %>"></img></div>
+        <% } %>
+        <div><%= record.type %></div>
         <div style="font-size: x-small;"><%= record.createdAt %></div>
     <% } %>
         <hr>
@@ -12,6 +16,13 @@
             <div class="mb-3">
                 <label class="form-label">Create New Provenance Record</label>
                 <input type="text" class="form-control" name="assertion" required placeholder="Device Assertion">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <form method="POST" enctype="multipart/form-data" action="/provenance/image/<%= deviceKey %>">
+            <div class="mb-3">
+                <label class="form-label" for="file">Upload Provenance Image Record</label>
+                <input type="file" class="form-control" accept="image/*" name="file" required>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

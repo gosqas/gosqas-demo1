@@ -18,6 +18,20 @@ interface ProvenanceRecordModel extends Model<InferAttributes<ProvenanceRecordMo
     createdAt: CreationOptional<Date>;
 }
 
+class $ProvenanceRecord implements ProvenanceRecord {
+    constructor(
+        readonly deviceID: bigint,
+        readonly type: string,
+        readonly data: Uint8Array,
+        readonly createdAt: Date,
+    ) {}
+
+    get dataURI(): string {
+        const buffer = Buffer.from(this.data);
+        return `data:${this.type};base64,${buffer.toString('base64')}`;
+    }
+}
+
 class Repository implements IRepository {
 
     constructor(
@@ -71,7 +85,7 @@ class Repository implements IRepository {
     async createProvenanceRecord(key: string | Uint8Array, type: string, data: Uint8Array): Promise<ProvenanceRecord> {
         key = typeof key === 'string' ? Buffer.from(key, 'hex') : key;
         const { deviceID, createdAt } = await this.provenanceRecordFactory(key, type, data);
-        return { deviceID, type, data, createdAt }
+        return new $ProvenanceRecord(deviceID, type, data, createdAt);
     }
 
     async getProvenanceRecords(key: string | Uint8Array): Promise<readonly ProvenanceRecord[]> {
@@ -89,12 +103,7 @@ class Repository implements IRepository {
             const $2 = crypter.final();
             const data = Buffer.concat([$1, $2]);
 
-            return <ProvenanceRecord>{
-                deviceID: record.deviceID,
-                type: record.type,
-                data,
-                createdAt: record.createdAt,
-            }
+            return new $ProvenanceRecord(deviceID, record.type, data, record.createdAt);
         });
     }
 }

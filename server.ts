@@ -1,6 +1,7 @@
 import fastify from 'fastify'
-import { fastifyView } from '@fastify/view'
-import { fastifyFormbody } from '@fastify/formbody'
+import fastifyView from '@fastify/view'
+import fastifyFormbody from '@fastify/formbody'
+import fastifyMultipart, { Multipart, MultipartFile } from '@fastify/multipart'
 import { Repository, calculateDeviceID } from './services';
 import * as qrcode from 'qrcode';
 
@@ -11,6 +12,7 @@ export function createFastifyServer(repo: Repository) {
         engine: { ejs: require('ejs') },
     });
     server.register(fastifyFormbody);
+    server.register(fastifyMultipart);
 
     server.get('/', async (request, reply) => {
         return reply.view('views/index.ejs', {})
@@ -42,7 +44,7 @@ export function createFastifyServer(repo: Repository) {
         const deviceID = calculateDeviceID(deviceKey);
         const records = await repo.getProvenanceRecords(deviceKey);
 
-        return reply.view('views/provenance.ejs', { deviceID, records });
+        return reply.view('views/provenance.ejs', { deviceKey, deviceID, records });
     });
 
     server.post<{ Params: DeviceKey, Body: { assertion: string } }>('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (request, reply) => {
@@ -52,6 +54,16 @@ export function createFastifyServer(repo: Repository) {
         await repo.createProvenanceRecord(deviceKey, "text/plain", data);
         reply.redirect(`/provenance/${deviceKey}`);
     })
+
+    server.post<{ Params: DeviceKey }>('/provenance/image/:deviceKey([0-9A-Fa-f]{64})', async (request, reply) => {
+        const { deviceKey } = request.params;
+        const file = await request.file();
+        if (file) {
+            const data = await file.toBuffer();
+            await repo.createProvenanceRecord(deviceKey, file.mimetype, data);
+        }
+        reply.redirect(`/provenance/${deviceKey}`);
+    });
 
     return server;
 }

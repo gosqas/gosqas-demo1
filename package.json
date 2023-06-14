@@ -13,6 +13,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@fastify/formbody": "^7.4.0",
+    "@fastify/multipart": "^7.6.1",
     "@fastify/view": "^7.4.1",
     "dotenv": "^16.1.4",
     "ejs": "^3.1.9",

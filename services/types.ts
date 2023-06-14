@@ -9,6 +9,7 @@ export interface ProvenanceRecord {
     readonly type: string;
     readonly data: Uint8Array;
     readonly createdAt: Date;
+    readonly dataURI: string;
 }
 
 export interface Repository {

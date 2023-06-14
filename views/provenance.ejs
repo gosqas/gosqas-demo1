@@ -2,19 +2,17 @@
     <h2>Provenance Records for <%= deviceID %>
     </h2>
     <% for (const record of records) { %>
-        <div>
-            <%= record.assertion %>
-        </div>
-        <div style="font-size: x-small;">
-            <%= record.createdAt %>
-        </div>
+        <% if (record.type === 'text/plain') { %>
+        <div><%= record.data %></div>
         <% } %>
-            <hr>
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Create New Provenance Record</label>
-                    <input type="text" class="form-control" name="assertion" required placeholder="Device Assertion">
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-            <%- include("./partials/footer.ejs") %>
+        <div style="font-size: x-small;"><%= record.createdAt %></div>
+    <% } %>
+        <hr>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Create New Provenance Record</label>
+                <input type="text" class="form-control" name="assertion" required placeholder="Device Assertion">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    <%- include("./partials/footer.ejs") %>

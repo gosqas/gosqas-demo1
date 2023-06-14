@@ -1,66 +1,57 @@
-import express, { Application, urlencoded } from "express";
-import { Repository } from "./services/types";
-import * as QR from 'qrcode';
-import { calculateDeviceID } from "./services";
+import fastify from 'fastify'
+import { fastifyView } from '@fastify/view'
+import { fastifyFormbody } from '@fastify/formbody'
+import { Repository, calculateDeviceID } from './services';
+import * as qrcode from 'qrcode';
 
-function getRepo(app: Application) {
-    const repo = app.get('repo') as Repository | undefined;
-    if (!repo) throw new Error('Repository not found');
-    return repo;
-}
+export function createFastifyServer(repo: Repository) {
 
-export function createExpressApp(repo: Repository) {
-    const app = express();
-    app.set('view engine', 'ejs');
-    app.set('repo', repo);
-    app.use(urlencoded({ extended: true }));
+    const server = fastify({ logger: true })
+    server.register(fastifyView, {
+        engine: { ejs: require('ejs') },
+    });
+    server.register(fastifyFormbody);
 
-    app.get('/', async (req, res) => {
-        res.render('index', {});
+    server.get('/', async (request, reply) => {
+        return reply.view('views/index.ejs', {})
     });
 
-
-    app.get('/devices', async (req, res) => {
-        const repo = getRepo(req.app);
+    server.get('/devices', async (request, reply) => {
         const devices = await repo.getDevices();
-        res.render('devices', { devices });
+        return reply.view('views/devices.ejs', { devices })
     });
 
-    app.post('/devices', async (req, res) => {
-        const deviceName = req.body.deviceName as string;
-        const repo = getRepo(req.app);
+    type DeviceKey = { deviceKey: string };
+
+    server.post<{ Body: { deviceName: string } }>('/devices', async (request, reply) => {
+        const { deviceName } = request.body;
         const device = await repo.createDevice(deviceName);
-        res.redirect('/devices');
+        reply.redirect('/devices');
     });
 
-    app.get('/device/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
-        const { deviceKey } = req.params;
-        const repo = getRepo(req.app);
+    server.get<{ Params: DeviceKey }>('/device/:deviceKey([0-9A-Fa-f]{64})', async (request, reply) => {
+        const { deviceKey } = request.params;
         const device = await repo.getDevice(deviceKey);
         if (!device) throw new Error('Device not found');
-        const dataURL = await QR.toDataURL(`${process.env.BASE_URL}/provenance/${device.deviceID}`);
-        res.render('device', { device, dataURL });
+        const dataURL = await qrcode.toDataURL(`${process.env.BASE_URL}/provenance/${device.deviceID}`);
+        return reply.view('views/device.ejs', { device, dataURL });
     });
 
-    app.get('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
-        const { deviceKey } = req.params;
-        const repo = getRepo(req.app);
+    server.get<{ Params: DeviceKey }>('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (request, reply) => {
+        const { deviceKey } = request.params;
         const deviceID = calculateDeviceID(deviceKey);
         const records = await repo.getProvenanceRecords(deviceKey);
 
-        res.render('provenance', { deviceID, records });
+        return reply.view('views/provenance.ejs', { deviceID, records });
     });
 
-    app.post('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (req, res) => {
-        const { deviceKey } = req.params;
-        const assertion = req.body.assertion as string;
+    server.post<{ Params: DeviceKey, Body: { assertion: string } }>('/provenance/:deviceKey([0-9A-Fa-f]{64})', async (request, reply) => {
+        const { deviceKey } = request.params;
+        const { assertion } = request.body;
         const data = Buffer.from(assertion, 'utf8');
-
-        const repo = getRepo(req.app);
         await repo.createProvenanceRecord(deviceKey, "text/plain", data);
+        reply.redirect(`/provenance/${deviceKey}`);
+    })
 
-        res.redirect(`/provenance/${deviceKey}`);
-    });
-
-    return app;
+    return server;
 }
